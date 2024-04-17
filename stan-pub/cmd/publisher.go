@@ -18,7 +18,7 @@ func main() {
 	}
 	defer sc.Close()
 
-	jsonFilePath := "assets/model-1.json"
+	jsonFilePath := "../assets/model-1.json"
 
 	jsonData, err := os.ReadFile(jsonFilePath)
 	if err != nil {

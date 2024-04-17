@@ -48,3 +48,36 @@ func (db *DB) InsertOrder(order model.Order) error {
 
 	return nil
 }
+
+func (db *DB) GetData() ([]model.Data, error) {
+	rows, err := db.Query(`SELECT * FROM orders`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var data []model.Data
+	for rows.Next() {
+		var d model.Data
+		var jsonData []byte
+		err := rows.Scan(&d.ID, &jsonData)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(jsonData, &d.Order)
+		if err != nil {
+			return nil, err
+		}
+
+		data = append(data, d)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}

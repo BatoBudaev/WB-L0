@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/BatoBudaev/WB-L0/internal/cache"
 	"github.com/BatoBudaev/WB-L0/internal/database"
 	"github.com/BatoBudaev/WB-L0/internal/model"
 	"github.com/nats-io/stan.go"
@@ -15,6 +16,8 @@ func main() {
 	}
 	defer db.Close()
 
+	cache.InitCacheFromDb(db)
+
 	sc, err := stan.Connect(
 		"test-cluster",
 		"subscriber",
@@ -27,20 +30,22 @@ func main() {
 	defer sc.Close()
 
 	cb := func(msg *stan.Msg) {
-		var order model.Order
-		err := json.Unmarshal(msg.Data, &order)
+		var data model.Data
+		err := json.Unmarshal(msg.Data, &data.Order)
 		if err != nil {
 			log.Printf("Не удалось разобрать JSON: %v", err)
 			return
 		}
 
-		err = model.ValidateOrder(order)
+		err = model.ValidateOrder(data.Order)
 		if err != nil {
 			log.Printf("Не удалось проверить данные: %v", err)
 			return
 		}
 
-		err = db.InsertOrder(order)
+		cache.UpdateCache(data)
+
+		err = db.InsertOrder(data.Order)
 		if err != nil {
 			log.Fatalf("Не удалось вставить данные: %v", err)
 		}

@@ -1,5 +1,10 @@
 package model
 
+type Data struct {
+	ID    int
+	Order Order
+}
+
 type Order struct {
 	OrderUID          string   `json:"order_uid" validate:"required"`
 	TrackNumber       string   `json:"track_number" validate:"required"`
