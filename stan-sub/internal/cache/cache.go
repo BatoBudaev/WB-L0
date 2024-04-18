@@ -9,7 +9,7 @@ import (
 )
 
 var orderCache = make(map[int]model.Order)
-var idCache int
+var idCache = 1
 var cacheMutex = &sync.Mutex{}
 
 func InitCacheFromDb(db *database.DB) {
