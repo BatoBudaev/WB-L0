@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"github.com/BatoBudaev/WB-L0/internal/database"
 	"github.com/BatoBudaev/WB-L0/internal/model"
 	"log"
@@ -8,6 +9,7 @@ import (
 )
 
 var orderCache = make(map[int]model.Order)
+var idCache int
 var cacheMutex = &sync.Mutex{}
 
 func InitCacheFromDb(db *database.DB) {
@@ -20,11 +22,25 @@ func InitCacheFromDb(db *database.DB) {
 	defer cacheMutex.Unlock()
 	for _, d := range data {
 		orderCache[d.ID] = d.Order
+		idCache = d.ID
 	}
 }
 
 func UpdateCache(data model.Data) {
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
-	orderCache[data.ID] = data.Order
+	orderCache[idCache] = data.Order
+	idCache++
+}
+
+func GetOrderById(id int) (model.Order, error) {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+
+	order, ok := orderCache[id]
+	if !ok {
+		return model.Order{}, fmt.Errorf("заказ с ID %d не найден", id)
+	}
+
+	return order, nil
 }

@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"github.com/BatoBudaev/WB-L0/internal/cache"
 	"github.com/BatoBudaev/WB-L0/internal/database"
+	"github.com/BatoBudaev/WB-L0/internal/handlers"
 	"github.com/BatoBudaev/WB-L0/internal/model"
 	"github.com/nats-io/stan.go"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -56,5 +58,10 @@ func main() {
 		log.Fatalf("Не удалось подписаться: %v", err)
 	}
 
-	select {}
+	http.HandleFunc("/order", handlers.OrderHandler)
+	log.Println("Сервер запущен на порту 8080")
+	err = http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatalf("Ошибка при запуске сервера: %v", err)
+	}
 }
